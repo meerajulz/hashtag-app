@@ -4,7 +4,10 @@ import TagSuggestion from './tag-suggestion.component';
 
 describe('TextTagSuggestionInput', () => {
   test('renders TextInput component', () => {
-    render(<TagSuggestion />);
+    const tags = {
+      /* define your tags here */
+    };
+    render(<TagSuggestion suggestions={[]} />);
     expect(screen.getByPlaceholderText('Type here...')).toBeInTheDocument();
   });
 });

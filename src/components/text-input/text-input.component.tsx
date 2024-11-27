@@ -38,6 +38,19 @@ const tagList = [
 const TextInput = () => {
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  //extend selecting tags
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  //handle selection
+  const handleSelection = (tag: string) => {
+    // Add tag to selectedTags if not already included
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+    }
+    // Clear input and suggestions
+    setInput('');
+    setSuggestions([]);
+  };
 
   useEffect(() => {
     if (input) {
@@ -60,7 +73,17 @@ const TextInput = () => {
         className="w-full p-2 border border-gray-300 rounded-md"
         placeholder="Type here..."
       />
-      <TagSuggestion suggestions={suggestions} />
+      {/* Display tag suggestions */}
+      <TagSuggestion suggestions={suggestions} onTagClick={handleSelection} />
+
+      {/* Display selected tags */}
+      <div className="mt-2 flex flex-wrap">
+        {selectedTags.map((tag, index) => (
+          <span key={index} className="m-1 p-2 bg-blue-200 rounded">
+            {tag}
+          </span>
+        ))}
+      </div>
     </div>
   );
 };

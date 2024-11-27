@@ -7,7 +7,14 @@ describe('TextTagSuggestionInput', () => {
     const tags = {
       /* define your tags here */
     };
-    render(<TagSuggestion suggestions={[]} />);
+    render(
+      <TagSuggestion
+        suggestions={[]}
+        onTagClick={function (tag: string): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
     expect(screen.getByPlaceholderText('Type here...')).toBeInTheDocument();
   });
 });

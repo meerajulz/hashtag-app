@@ -3,7 +3,7 @@ import TextInput from './components/text-input/text-input.component';
 
 function App() {
   return (
-    <main>
+    <main className="container mx-auto p-4">
       <header className="App-header">
         <h1>Medical Report Auto-Complete</h1>
       </header>

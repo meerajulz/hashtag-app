@@ -1,9 +1,5 @@
 import React from 'react';
-
-interface TagSuggestionProps {
-  suggestions: string[];
-  onTagClick: (tag: string) => void;
-}
+import { TagSuggestionProps } from '../../types/types';
 
 const TagSuggestion: React.FC<TagSuggestionProps> = ({
   suggestions,

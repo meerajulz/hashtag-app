@@ -9,15 +9,31 @@ const TextInput = () => {
   //extend selecting tags
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  //handle selection
+  // handle input change events
+  const handleInputChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    updateSuggestions(e.target.value);
+  };
+
+  //handle input change
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && input.trim() !== '') {
+      e.preventDefault(); // Prevent form submission
+      handleSelection(input.trim());
+      setInput('');
+      setSuggestions([]);
+    }
+  };
+
+  //handle selection in tags
   const handleSelection = (tag: string) => {
     // Add tag to selectedTags if not already included
     if (!selectedTags.includes(tag)) {
       setSelectedTags([...selectedTags, tag]);
+      // Clear input and suggestions
+      setInput('');
+      setSuggestions([]);
     }
-    // Clear input and suggestions
-    setInput('');
-    setSuggestions([]);
   };
 
   //handle removing tags
@@ -28,9 +44,10 @@ const TextInput = () => {
     setSelectedTags(updatedTags);
   };
 
-  useEffect(() => {
-    if (input) {
-      const regex = new RegExp(`^${input}`, 'i');
+  // update suggestions based on input
+  const updateSuggestions = (value: string) => {
+    if (value) {
+      const regex = new RegExp(`^${value}`, 'i');
       const filteredTags = tagList.filter((tag) => tag.match(regex));
       setSuggestions(filteredTags);
       console.log(filteredTags);
@@ -38,6 +55,10 @@ const TextInput = () => {
       setSuggestions([]);
       console.log([]);
     }
+  };
+
+  useEffect(() => {
+    updateSuggestions(input);
   }, [input]);
 
   return (
@@ -45,7 +66,8 @@ const TextInput = () => {
       <input
         type="text"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={handleInputChanged}
+        onKeyDown={handleKeyPress}
         className="w-full p-2 border border-gray-300 rounded-md"
         placeholder="Type here..."
       />

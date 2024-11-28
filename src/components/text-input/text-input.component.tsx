@@ -1,81 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TagSuggestion from '../tag-suggestion/tag-suggestion.component';
-import SelectedTag from '../selected-tag/selected-tag.component';
 import tagList from '../../constants/tag-list';
 
-const TextInput = () => {
-  const [input, setInput] = useState<string>('');
+interface ITextInputProps {
+  // Define props here if any
+}
+
+const TextInput: React.FC<ITextInputProps> = () => {
+  const [content, setContent] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  //extend selecting tags
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  // handle input change events
-  const handleInputChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-    updateSuggestions(e.target.value);
-  };
-
-  //handle input change
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && input.trim() !== '') {
-      e.preventDefault(); // Prevent form submission
-      handleSelection(input.trim());
-      setInput('');
-      setSuggestions([]);
-    }
-  };
-
-  //handle selection in tags
-  const handleSelection = (tag: string) => {
-    // Add tag to selectedTags if not already included
-    if (!selectedTags.includes(tag)) {
-      setSelectedTags([...selectedTags, tag]);
-      // Clear input and suggestions
-      setInput('');
-      setSuggestions([]);
-    }
-  };
-
-  //handle removing tags
-  const handleRemoveTag = (tag: string) => {
-    const updatedTags = selectedTags.filter(
-      (selectedTag) => selectedTag !== tag
-    );
-    setSelectedTags(updatedTags);
-  };
-
-  // update suggestions based on input
-  const updateSuggestions = (value: string) => {
-    if (value) {
-      const regex = new RegExp(`^${value}`, 'i');
-      const filteredTags = tagList.filter((tag) => tag.match(regex));
-      setSuggestions(filteredTags);
-      console.log(filteredTags);
-    } else {
-      setSuggestions([]);
-      console.log([]);
-    }
-  };
+  const editableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    updateSuggestions(input);
-  }, [input]);
+    const handleInput = () => {
+      const text = editableRef.current?.innerText || '';
+      setContent(text);
+      updateSuggestions(text);
+    };
+
+    const current = editableRef.current;
+    current?.addEventListener('input', handleInput);
+    return () => current?.removeEventListener('input', handleInput);
+  }, []);
+
+  const updateSuggestions = (text: string): void => {
+    const words = text.split(' ');
+    const lastWord = words[words.length - 1];
+    if (lastWord.startsWith('#')) {
+      const searchQuery = lastWord.slice(1);
+      const matchedTags = tagList.filter((tag) => tag.startsWith(searchQuery));
+      setSuggestions(matchedTags);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleTagClick = (tag: string): void => {
+    const newText = content.replace(/#\w+$/, `#${tag} `);
+    if (editableRef.current) {
+      editableRef.current.innerText = newText;
+      // editableRef.current.focus();
+      setCaretToEnd(); // Set the cursor position to the end
+    }
+    setSuggestions([]);
+    setContent(newText);
+  };
+
+  const setCaretToEnd = () => {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    if (editableRef.current) {
+      range.selectNodeContents(editableRef.current);
+    }
+    range.collapse(false); // false collapses the range to the end
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    if (editableRef.current) {
+      editableRef.current.focus(); // Focus the contentEditable element
+    }
+  };
 
   return (
     <div className="p-4">
-      <input
-        type="text"
-        value={input}
-        onChange={handleInputChanged}
-        onKeyDown={handleKeyPress}
-        className="w-full p-2 border border-gray-300 rounded-md"
-        placeholder="Type here..."
+      <div
+        ref={editableRef}
+        contentEditable
+        className="w-full h-32 p-2 border border-gray-300 rounded-md"
+        style={{ outline: 'none' }}
+        data-placeholder="Type here..."
       />
-      {/* Display tag suggestions */}
-      <TagSuggestion suggestions={suggestions} onTagClick={handleSelection} />
-
-      {/* Display selected tags */}
-      <SelectedTag onTagRemove={handleRemoveTag} tags={selectedTags} />
+      {suggestions.length > 0 && (
+        <TagSuggestion suggestions={suggestions} onTagClick={handleTagClick} />
+      )}
     </div>
   );
 };

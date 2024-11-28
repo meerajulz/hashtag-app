@@ -20,6 +20,14 @@ const TextInput = () => {
     setSuggestions([]);
   };
 
+  //handle removing tags
+  const handleRemoveTag = (tag: string) => {
+    const updatedTags = selectedTags.filter(
+      (selectedTag) => selectedTag !== tag
+    );
+    setSelectedTags(updatedTags);
+  };
+
   useEffect(() => {
     if (input) {
       const regex = new RegExp(`^${input}`, 'i');
@@ -45,7 +53,7 @@ const TextInput = () => {
       <TagSuggestion suggestions={suggestions} onTagClick={handleSelection} />
 
       {/* Display selected tags */}
-      <SelectedTag tags={selectedTags} />
+      <SelectedTag onTagRemove={handleRemoveTag} tags={selectedTags} />
     </div>
   );
 };

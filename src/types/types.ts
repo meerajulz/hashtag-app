@@ -5,4 +5,5 @@ export interface TagSuggestionProps {
 
 export interface SelectedTagsProps {
   tags: string[];
+  onTagRemove: (tag: string) => void;
 }

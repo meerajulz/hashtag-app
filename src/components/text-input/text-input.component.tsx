@@ -70,6 +70,11 @@ const TextInput = () => {
     }
   };
 
+  //when we click in ESC we move back to input field
+  const clearSuggestions = (): void => {
+    setSuggestions([]);
+  };
+
   return (
     <div className="p-4">
       <div
@@ -85,6 +90,8 @@ const TextInput = () => {
           ref={suggestionRef}
           suggestions={suggestions}
           onTagClick={handleTagClick}
+          textInputRef={editableRef}
+          onSuggestionsClear={clearSuggestions}
         />
       )}
     </div>

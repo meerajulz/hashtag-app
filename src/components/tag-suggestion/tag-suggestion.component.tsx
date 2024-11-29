@@ -3,7 +3,7 @@ import { TagSuggestionProps } from '../../types/types';
 import './tag-suggestion.style.css';
 
 const TagSuggestion = forwardRef<HTMLUListElement, TagSuggestionProps>(
-  ({ suggestions, onTagClick, textInputRef }, ref) => {
+  ({ suggestions, onTagClick, textInputRef, onSuggestionsClear }, ref) => {
     const [focusedIndex, setFocusedIndex] = useState(0);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
@@ -20,11 +20,15 @@ const TagSuggestion = forwardRef<HTMLUListElement, TagSuggestionProps>(
       } else if (event.key === 'Enter' && suggestions.length) {
         onTagClick(suggestions[focusedIndex]);
         event.preventDefault();
-      } else if (event.key === 'Escape' || event.key === 'ESC') {
+      } else if (event.key === 'Escape') {
         // Handle escaping from tag suggestions back to text input
         if (textInputRef && textInputRef.current) {
           textInputRef.current.focus();
+          if (typeof onSuggestionsClear === 'function') {
+            onSuggestionsClear(); // Call a function to clear/close suggestions
+          }
         }
+        event.preventDefault();
       }
     };
 

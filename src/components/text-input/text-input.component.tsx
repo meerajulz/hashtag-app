@@ -20,25 +20,17 @@ const TextInput = () => {
     return () => current?.removeEventListener('input', handleInput);
   }, []);
 
-  useEffect(() => {}, [suggestions]); //?????
-
   const updateSuggestions = (text: string): void => {
-    const words = text.split(' ');
     const lastWord = text.split(' ').pop();
     if (lastWord?.startsWith('#') && lastWord.length > 1) {
       const searchQuery = lastWord.slice(1);
-      const matchedTags = tagList.filter((tag) => tag.startsWith(searchQuery));
-      setSuggestions(matchedTags);
+      setSuggestions(tagList.filter((tag) => tag.startsWith(searchQuery)));
     } else {
       setSuggestions([]);
     }
   };
 
   const handleTagClick = (tag: string): void => {
-    applyTag(tag);
-  };
-
-  const applyTag = (tag: string) => {
     const newText = content.replace(/#\w+$/, `#${tag} `);
     if (editableRef.current) {
       editableRef.current.innerText = newText;
@@ -48,7 +40,7 @@ const TextInput = () => {
     setContent(newText);
   };
 
-  const setCaretToEnd = () => {
+  const setCaretToEnd = (): void => {
     const range = document.createRange();
     const sel = window.getSelection();
     if (editableRef.current) {

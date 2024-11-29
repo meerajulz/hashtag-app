@@ -1,0 +1,8 @@
+.focused-tag {
+    background-color: #e2e8f0;
+    /* light blue */
+    color: #1a202c;
+    /* dark gray - adjust colors based on your theme */
+    border-left: 3px solid #3182ce;
+    /* blue */
+}

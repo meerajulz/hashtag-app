@@ -2,14 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import TagSuggestion from '../tag-suggestion/tag-suggestion.component';
 import tagList from '../../constants/tag-list';
 
-interface ITextInputProps {
-  // Define props here if any
-}
-
-const TextInput: React.FC<ITextInputProps> = () => {
+const TextInput = () => {
   const [content, setContent] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const editableRef = useRef<HTMLDivElement>(null);
+  const suggestionRef = useRef<HTMLUListElement>(null); //
 
   useEffect(() => {
     const handleInput = () => {
@@ -23,10 +20,12 @@ const TextInput: React.FC<ITextInputProps> = () => {
     return () => current?.removeEventListener('input', handleInput);
   }, []);
 
+  useEffect(() => {}, [suggestions]); //?????
+
   const updateSuggestions = (text: string): void => {
     const words = text.split(' ');
-    const lastWord = words[words.length - 1];
-    if (lastWord.startsWith('#')) {
+    const lastWord = text.split(' ').pop();
+    if (lastWord?.startsWith('#') && lastWord.length > 1) {
       const searchQuery = lastWord.slice(1);
       const matchedTags = tagList.filter((tag) => tag.startsWith(searchQuery));
       setSuggestions(matchedTags);
@@ -36,11 +35,14 @@ const TextInput: React.FC<ITextInputProps> = () => {
   };
 
   const handleTagClick = (tag: string): void => {
+    applyTag(tag);
+  };
+
+  const applyTag = (tag: string) => {
     const newText = content.replace(/#\w+$/, `#${tag} `);
     if (editableRef.current) {
       editableRef.current.innerText = newText;
-      // editableRef.current.focus();
-      setCaretToEnd(); // Set the cursor position to the end
+      setCaretToEnd();
     }
     setSuggestions([]);
     setContent(newText);
@@ -51,14 +53,28 @@ const TextInput: React.FC<ITextInputProps> = () => {
     const sel = window.getSelection();
     if (editableRef.current) {
       range.selectNodeContents(editableRef.current);
+      range.collapse(false);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+      editableRef.current.focus();
     }
-    range.collapse(false); // false collapses the range to the end
-    if (sel) {
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-    if (editableRef.current) {
-      editableRef.current.focus(); // Focus the contentEditable element
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowDown' && suggestions.length > 0) {
+      // focus on the suggestions if the user explicitly navigates
+      suggestionRef.current?.focus();
+      event.preventDefault();
+    } else if (
+      event.key === 'Enter' &&
+      !suggestionRef.current?.contains(document.activeElement)
+    ) {
+      // Handle creating new tags on Enter press when not focusing on suggestions
+      const newTag = content.split(' ').pop();
+      if (newTag?.startsWith('#')) {
+        handleTagClick(newTag.slice(1));
+        event.preventDefault();
+      }
     }
   };
 
@@ -70,9 +86,14 @@ const TextInput: React.FC<ITextInputProps> = () => {
         className="w-full h-32 p-2 border border-gray-300 rounded-md"
         style={{ outline: 'none' }}
         data-placeholder="Type here..."
+        onKeyDown={handleKeyDown}
       />
       {suggestions.length > 0 && (
-        <TagSuggestion suggestions={suggestions} onTagClick={handleTagClick} />
+        <TagSuggestion
+          ref={suggestionRef}
+          suggestions={suggestions}
+          onTagClick={handleTagClick}
+        />
       )}
     </div>
   );
